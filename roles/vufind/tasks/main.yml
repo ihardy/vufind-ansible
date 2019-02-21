@@ -1,0 +1,179 @@
+---
+- name: install apache2
+  apt:
+    name: apache2
+    update_cache: yes
+    cache_valid_time: 3600
+  become: yes
+
+- name: enable apache mod rewrite
+  apache2_module:
+    state: present
+    name: rewrite
+  become: yes
+
+- name: insall mysql
+  apt:
+    name: "{{ packages }}"
+    update_cache: yes
+    cache_valid_time: 3600
+  vars:
+    packages:
+    - mysql-server
+    - python3-mysqldb
+  become: yes
+
+- name: Set MySQL root password for localhost, 127.0.0.1, ::1
+  mysql_user:
+    name: root
+    password: "{{ mysql_root_password }}"
+    host: "{{ item }}"
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+  with_items:
+    - localhost
+    - 127.0.0.1
+    - ::1
+  become: yes
+
+- name: add my.cnf file
+  template:
+    src: my.cnf.j2
+    dest: /root/.my.cnf
+    owner: root
+    mode: 0600
+  become: yes
+  notify: restart mysql server
+
+- name: remove test db
+  mysql_db:
+    name: test
+    state: absent
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+
+- name: remove anonymous accounts
+  mysql_user:
+    name: ''
+    host_all: yes
+    state: absent
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+
+- name: install php requirements
+  apt:
+    name: "{{ packages }}"
+    update_cache: yes
+    cache_valid_time: 3600
+  vars:
+    packages:
+    - libapache2-mod-php
+    - php-mbstring
+    - php-pear
+    - php
+    - php-dev
+    - php-gd
+    - php-intl
+    - php-json
+    - php-mysql
+    - php-xml
+    - php-soap
+  become: yes
+
+- name: install java requirements
+  apt:
+    name: "{{ packages }}"
+    update_cache: yes
+    cache_valid_time: 3600
+  vars:
+    packages:
+    - openjdk-8-jdk
+  become: yes
+
+- name: download vufind
+  get_url:
+    url: https://github.com/vufind-org/vufind/releases/download/v5.1/vufind-{{ vufind_version }}.tar.gz
+    dest: /tmp/vufind-{{ vufind_version }}.tar.gz
+
+- name: create vufind directory
+  file:
+    path: /usr/local/vufind
+    state: directory
+  become: yes
+
+- name: extract vufind
+  unarchive:
+    remote_src: yes
+    src: /tmp/vufind-{{ vufind_version }}.tar.gz
+    dest: /usr/local/vufind/
+    extra_opts: [--strip-components=1]
+  become: yes
+
+- name: install vufind and accept default prompts
+  shell: 'echo "\n\n\n" | /usr/bin/php install.php'
+  args:
+    chdir: /usr/local/vufind
+    creates: /usr/local/vufind/local/httpd-vufind.conf
+  become: true
+
+- name: link vufind config to apache configs
+  file:
+    src: /usr/local/vufind/local/httpd-vufind.conf
+    dest: /etc/apache2/conf-enabled/vufind.conf
+    state: link
+  notify: restart apache
+  become: yes
+
+- name: add vufind environment file
+  template:
+    src: vufind.sh.j2
+    dest: /etc/profile.d/vufind.sh
+    owner: root
+    mode: 0644
+  become: yes
+
+- name: add vufind user
+  user:
+    name: vufind
+    shell: /bin/sh
+  become: true
+
+- name: set permissions on vufind installation dir
+  file:
+    path: /usr/local/vufind
+    owner: vufind
+    group: vufind
+    recurse: yes
+  become: yes
+
+- name: allow www-data access to cache 
+  file:
+    path: "{{ item }}"
+    owner: www-data
+    group: www-data
+  with_items:
+    - /usr/local/vufind/local/cache
+    - /usr/local/vufind/local/config
+  become: yes
+
+- name: add vufind service unit file
+  template:
+    src: vufind.service.j2
+    dest: /etc/systemd/system/vufind.service
+    owner: root
+    mode: 0644
+  become: yes
+
+- name: enable vufind service
+  systemd:
+    name: vufind
+    enabled: yes
+    masked: no
+    daemon_reload: yes
+  become: yes
+
+- name: start vufind
+  systemd:
+    name: vufind
+    state: restarted
+  become: yes
