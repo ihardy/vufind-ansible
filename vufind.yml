@@ -1,6 +1,5 @@
 ---
-# Ansible playbook to deploy Okapi and FOLIO modules
-# Provision a host as a backend FOLIO system
+# provision vufind and load sample data
 - hosts: all
   roles:
     - vufind

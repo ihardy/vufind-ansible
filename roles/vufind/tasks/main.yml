@@ -60,6 +60,22 @@
     login_user: root
     login_password: "{{ mysql_root_password }}"
 
+- name: vufind database must exist
+  mysql_db:
+    name: "{{ vufind_db }}"
+    state: present
+    encoding: utf8
+    config_file: /root/.my.cnf
+  become: yes
+
+- name: vufind database user must exist and have privs
+  mysql_user:
+    name: "{{ vufind_db_user }}"
+    password: "{{ vufind_db_pass }}"
+    priv: "{{ vufind_db }}.*:SELECT,INSERT,UPDATE,DELETE"
+    config_file: /root/.my.cnf
+  become: yes
+
 - name: install php requirements
   apt:
     name: "{{ packages }}"
@@ -124,6 +140,16 @@
   notify: restart apache
   become: yes
 
+- name: add vufind config file
+  template:
+    src: config.ini.j2
+    dest: /usr/local/vufind/local/config/vufind/config.ini
+    variable_start_string: '<%'
+    variable_end_string: '%>'
+    mode: 0644
+  become: yes
+  
+
 - name: add vufind environment file
   template:
     src: vufind.sh.j2
@@ -148,12 +174,10 @@
 
 - name: allow www-data access to cache 
   file:
-    path: "{{ item }}"
+    path: /usr/local/vufind/local/cache/
     owner: www-data
     group: www-data
-  with_items:
-    - /usr/local/vufind/local/cache
-    - /usr/local/vufind/local/config
+    recurse: yes
   become: yes
 
 - name: add vufind service unit file
@@ -177,3 +201,35 @@
     name: vufind
     state: restarted
   become: yes
+
+- name: create vufind directory
+  file:
+    path: /var/vufind
+    owner: vufind
+    group: vufind
+    state: directory
+  become: yes
+  when: vufind_local_sample_data == true
+
+- name: copy sample data to node
+  copy:
+    src: files/harvard-bib-sample.mrc
+    dest: /var/vufind/harvard-bib-sample.mrc
+    owner: vufind
+    group: vufind
+    mode: 0644
+  become: yes
+  when: vufind_local_sample_data == true
+
+- name: check if sample data has alreday been indexed
+  uri:
+    url: http://localhost:8080/solr/biblio/select?q=id:009518782-0
+  register: known_record_response
+  when: vufind_local_sample_data == true
+
+- name: index sample data
+  shell: 
+    cmd: './import-marc.sh /var/vufind/harvard-bib-sample.mrc'
+    chdir: /usr/local/vufind/
+  become: yes
+  when: vufind_local_sample_data == true and known_record_response.json.response.numFound != 1
