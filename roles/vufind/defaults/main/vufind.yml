@@ -3,4 +3,31 @@ vufind_db: vufind
 vufind_db_user: vufind
 vufind_db_pass: vufindadmin
 vufind_db_host: localhost
-vufind_local_sample_data: true
+vufind_load_sample_data: true
+sample_data_urls: 
+  - https://archive.org/download/unc_catalog_marc/marc-00000000-00001999.mrc
+  - https://archive.org/download/unc_catalog_marc/marc-00002000-00003999.mrc
+  - https://archive.org/download/unc_catalog_marc/marc-00004000-00005999.mrc
+  - https://archive.org/download/unc_catalog_marc/marc-00006000-00007999.mrc
+  - https://archive.org/download/unc_catalog_marc/marc-00008000-00009999.mrc
+  - https://archive.org/download/unc_catalog_marc/marc-00010000-00011999.mrc
+  - https://archive.org/download/unc_catalog_marc/marc-00014000-00015999.mrc
+  - https://archive.org/download/unc_catalog_marc/marc-00016000-00017999.mrc
+  - https://archive.org/download/unc_catalog_marc/marc-00018000-00019999.mrc
+  - https://archive.org/download/unc_catalog_marc/marc-00020000-00021999.mrc
+  - https://archive.org/download/unc_catalog_marc/marc-00022000-00023999.mrc
+  - https://archive.org/download/unc_catalog_marc/marc-00024000-00025999.mrc
+  - https://archive.org/download/unc_catalog_marc/marc-00026000-00027999.mrc
+  - https://archive.org/download/unc_catalog_marc/marc-00028000-00029999.mrc
+  - https://archive.org/download/unc_catalog_marc/marc-00030000-00031999.mrc
+  - https://archive.org/download/unc_catalog_marc/marc-00032000-00033999.mrc
+  - https://archive.org/download/unc_catalog_marc/marc-00034000-00035999.mrc
+  - https://archive.org/download/unc_catalog_marc/marc-00036000-00037999.mrc
+  - https://archive.org/download/unc_catalog_marc/marc-00038000-00039999.mrc
+  - https://archive.org/download/unc_catalog_marc/marc-00040000-00041999.mrc
+  - https://archive.org/download/unc_catalog_marc/marc-00042000-00043999.mrc
+  - https://archive.org/download/unc_catalog_marc/marc-00044000-00045999.mrc
+  - https://archive.org/download/unc_catalog_marc/marc-00046000-00047999.mrc
+  - https://archive.org/download/unc_catalog_marc/marc-00048000-00049999.mrc
+  - https://archive.org/download/unc_catalog_marc/marc-00050000-00051999.mrc
+sample_data_known_solr_query: http://localhost:8080/solr/biblio/select?q=id:80126

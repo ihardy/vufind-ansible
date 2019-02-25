@@ -12,7 +12,7 @@
     name: rewrite
   become: yes
 
-- name: insall mysql
+- name: install mysql
   apt:
     name: "{{ packages }}"
     update_cache: yes
@@ -43,7 +43,12 @@
     owner: root
     mode: 0600
   become: yes
-  notify: restart mysql server
+
+- name: restart mysql server
+  systemd:
+    state: restarted
+    name: mysql
+  become: yes
 
 - name: remove test db
   mysql_db:
@@ -60,6 +65,20 @@
     login_user: root
     login_password: "{{ mysql_root_password }}"
 
+- name: try to check if vufind user and db have been created
+  shell:
+    cmd: mysql -e 'DESCRIBE {{ vufind_db }}.record;' | grep record_id
+  become: yes
+  register: check_db
+  failed_when: check_db == 2
+
+- name: make vufind db and user sql creation script from template
+  template:
+    src: dbsetup.sql.j2
+    dest: /root/dbsetup.sql
+  become: yes
+  when: check_db.rc != 0
+
 - name: vufind database must exist
   mysql_db:
     name: "{{ vufind_db }}"
@@ -67,14 +86,32 @@
     encoding: utf8
     config_file: /root/.my.cnf
   become: yes
+  when: check_db.rc != 0
 
 - name: vufind database user must exist and have privs
   mysql_user:
     name: "{{ vufind_db_user }}"
     password: "{{ vufind_db_pass }}"
     priv: "{{ vufind_db }}.*:SELECT,INSERT,UPDATE,DELETE"
-    config_file: /root/.my.cnf
+    config_file: /root/.my.cnf  
   become: yes
+  when: check_db.rc != 0
+
+- name: run vufind db and user creation script
+  mysql_db: 
+    state: import
+    target: /root/dbsetup.sql
+    config_file: /root/.my.cnf
+    name: vufind
+  become: yes
+  when: check_db.rc != 0
+
+- name: cleanup vufind db and user creation script
+  file:
+    path: /root/dbsetup.sql
+    state: absent
+  become: yes
+  when: check_db.rc != 0
 
 - name: install php requirements
   apt:
@@ -123,7 +160,9 @@
     src: /tmp/vufind-{{ vufind_version }}.tar.gz
     dest: /usr/local/vufind/
     extra_opts: [--strip-components=1]
+    creates: /usr/local/vufind/install.php
   become: yes
+
 
 - name: install vufind and accept default prompts
   shell: 'echo "\n\n\n" | /usr/bin/php install.php'
@@ -137,7 +176,21 @@
     src: /usr/local/vufind/local/httpd-vufind.conf
     dest: /etc/apache2/conf-enabled/vufind.conf
     state: link
-  notify: restart apache
+  become: yes
+
+- name: clobber default apache vhost
+  template:
+    src: 000-default.conf.j2
+    dest: /etc/apache2/sites-available/000-default.conf
+    owner: root
+    group: root
+    mode: 0644
+  become: yes
+
+- name: restart apache
+  systemd:
+    state: restarted
+    name: apache2
   become: yes
 
 - name: add vufind config file
@@ -209,27 +262,33 @@
     group: vufind
     state: directory
   become: yes
-  when: vufind_local_sample_data == true
+  when: vufind_load_sample_data == true
 
-- name: copy sample data to node
-  copy:
-    src: files/harvard-bib-sample.mrc
-    dest: /var/vufind/harvard-bib-sample.mrc
+- name: fetch sample data
+  get_url:
+    url: "{{ item }}"
+    dest: "/var/vufind/sample-{{ idx }}.mrc"
     owner: vufind
     group: vufind
     mode: 0644
+  with_items: "{{ sample_data_urls }}"
+  loop_control:
+    index_var: idx
   become: yes
-  when: vufind_local_sample_data == true
+  when: vufind_load_sample_data == true
 
 - name: check if sample data has alreday been indexed
   uri:
-    url: http://localhost:8080/solr/biblio/select?q=id:009518782-0
+    url: "{{ sample_data_known_solr_query }}"
   register: known_record_response
-  when: vufind_local_sample_data == true
+  when: vufind_load_sample_data == true
 
 - name: index sample data
   shell: 
-    cmd: './import-marc.sh /var/vufind/harvard-bib-sample.mrc'
+    cmd: "./import-marc.sh /var/vufind/sample-{{ idx }}.mrc"
     chdir: /usr/local/vufind/
+  with_items: "{{ sample_data_urls }}"
+  loop_control:
+    index_var: idx
   become: yes
-  when: vufind_local_sample_data == true and known_record_response.json.response.numFound != 1
+  when: vufind_load_sample_data == true and known_record_response.json.response.numFound != 1

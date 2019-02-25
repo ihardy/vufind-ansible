@@ -1,5 +1,5 @@
 # vufind-ansible
-Anisble role for deploying a basic vufind instance and loading some sample data.
+Anisble playbook and role for deploying a basic vufind instance and loading some sample data. This playbook has been tested against Ubuntu 16.04 (Xenial).
 
 ## example playbook
 ```
@@ -7,16 +7,18 @@ Anisble role for deploying a basic vufind instance and loading some sample data.
   roles:
     - vufind
 ```
-
-## defaults
+## using the vagrant file
+To provision a vagrant box with vufind and load sample data, you need to have [Vagrant](https://www.vagrantup.com/) and [Ansible](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html) installed on the host machine. Assuming you have python3 already installed, here is one easy way to add Ansible without any impact on the system python install (if it exists):
 ```
-vufind_version: 5.1
-vufind_db: vufind
-vufind_db_user: vufind
-vufind_db_pass: vufindadmin
-vufind_db_host: localhost
-vufind_local_sample_data: true
+python -m venv venv
+source venv/bin/activate
+pip install ansible
 ```
+Once the prerequisites are met, run
+```
+vagrant up
+```
+You may want to tweak the amount of memory allocated to the vagrant box depending on whats available on your system. When you're done you can either run `vagrant halt` to shutdown and save the state of the Vagrant box or `vagrant destroy` to remove it.
 
 ## Notes
-This role contains information from the [Bibliographic Dataset](https://library.harvard.edu/services-tools/harvard-library-apis-datasets#biblio), which is provided by the [Harvard Library](http://library.harvard.edu/) under its [Bibliographic Dataset Use Terms](https://library.harvard.edu/services-tools/harvard-library-apis-datasets#biblio-terms) and includes data made available by, among others, [OCLC Online Computer Library Center](http://www.oclc.org/), Inc. and the [Library of Congress](http://www.loc.gov/cds/).
+Sample data is from UNC Libraries and fetch from the internet archive here: https://archive.org/download/unc_catalog_marc
