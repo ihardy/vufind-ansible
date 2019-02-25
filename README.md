@@ -18,6 +18,8 @@ Once the prerequisites are met, run
 ```
 vagrant up
 ```
+VuFind should be available at `http://localhost:8000/vufind/` (port 80 on the guest machine is mapped ot 8000 on the host).
+
 You may want to tweak the amount of memory allocated to the vagrant box depending on whats available on your system. When you're done you can either run `vagrant halt` to shutdown and save the state of the Vagrant box or `vagrant destroy` to remove it.
 
 ## Notes
