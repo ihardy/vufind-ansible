@@ -1,2 +1,6 @@
 ---
-mysql_root_password: admin
+mysql_root_password: admim
+vufind_db: vufind
+vufind_db_user: vufind
+vufind_db_pass: vufindadmin
+vufind_db_host: localhost

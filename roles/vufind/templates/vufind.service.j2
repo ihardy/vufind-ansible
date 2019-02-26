@@ -2,6 +2,7 @@ Description=VuFind Starter
 After=network.target apache2.service
 
 [Service]
+Environment=SOLR_HEAP={{ solr_heap_size }}
 Type=forking
 ExecStart=/bin/sh -l -c '/usr/local/vufind/solr.sh start' -x
 PIDFile=/usr/local/vufind/solr/vendor/bin/solr-8080.pid
