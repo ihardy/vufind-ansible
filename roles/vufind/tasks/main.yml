@@ -171,6 +171,18 @@
     creates: /usr/local/vufind/local/httpd-vufind.conf
   become: true
 
+- name: restrict Admin and Install locations
+  blockinfile:
+    path: /usr/local/vufind/local/httpd-vufind.conf
+    block: |
+      <LocationMatch "^/vufind/Admin">
+        Require all denied
+      </LocationMatch>
+      <LocationMatch "^/vufind/Install">
+        Require all denied
+      </LocationMatch>  
+  become: yes
+
 - name: link vufind config to apache configs
   file:
     src: /usr/local/vufind/local/httpd-vufind.conf

@@ -5,7 +5,7 @@ Vagrant.configure("2") do |config|
   # headroom for solr
   config.vm.provider "virtualbox" do |vb|
     vb.cpus = 2
-    vb.memory = "8192"
+    vb.memory = "4096"
   end
 
   # open ports
