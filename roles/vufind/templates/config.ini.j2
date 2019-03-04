@@ -229,7 +229,8 @@ session_name = VUFIND_SESSION
 ; Note: Enabling most of the features in this section will only work if you use an
 ; ILS driver that supports them; not all drivers support holds/renewals.
 [Catalog]
-driver          = Sample
+;driver          = Sample
+driver          =  <% vufind_driver %>
 
 ; loadNoILSOnFailure - Whether or not to load the NoILS driver if the main driver fails
 loadNoILSOnFailure = false
@@ -1046,7 +1047,7 @@ show_in_holdings = false    ; include in holdings tab of record view
 ; OpenURL resolver. An OpenURL resolver is typically used to e.g. link to full text
 ; from article metadata, but it may provide other services too. Extra parameters may
 ; be added if necessary.
-;url             = "http://openurl.myuniversity.edu/sfx_local"
+url             = "<% vufind_resolver_baseurl %>"
 
 ; This string will be included as part of your OpenURL referer ID (the full string
 ; will be "info:sid/[your rfr_id setting]:generator").  You may be able to configure
@@ -1059,7 +1060,7 @@ rfr_id          = vufind.svn.sourceforge.net
 ; OpenURLs for a particular platform.  Current legal values: "sfx", "360link",
 ; "EZB", "Redi," "demo" or "generic" (default is "generic" if commented out; "demo"
 ; generates fake values for use in testing the embed setting below).
-;resolver        = sfx
+resolver        = <% vufind_resolver %>
 
 ; If you want OpenURL links to open in a new window, set this setting to the
 ; desired Javascript window.open parameters.  If you do not want a new window
@@ -1069,9 +1070,9 @@ window_settings = "toolbar=no,location=no,directories=no,buttons=no,status=no,me
 ; If you want to display a graphical link to your link resolver, uncomment the
 ; settings below.  graphic should be a URL; graphic_width and graphic_height
 ; should be sizes in pixels.
-;graphic = "http://myuniversity.edu/images/findIt.gif"
-;graphic_width = 50
-;graphic_height = 20
+graphic = "<% graphic_url %>"
+graphic_width = <% graphic_width %>
+graphic_height = <% graphic_height %>
 
 ; If your link resolver can render an image in response to an OpenURL, you can
 ; specify the base URL for image generation here:
@@ -1084,8 +1085,8 @@ window_settings = "toolbar=no,location=no,directories=no,buttons=no,status=no,me
 
 ; The following settings control where OpenURL links are displayed:
 show_in_results = true      ; include in search results
-show_in_record = false      ; include in core record metadata
-show_in_holdings = false    ; include in holdings tab of record view
+show_in_record = true      ; include in core record metadata
+show_in_holdings = true    ; include in holdings tab of record view
 
 ; If set to true, this setting will attempt to embed results from the link
 ; resolver directly in search results instead of opening a new window or page.

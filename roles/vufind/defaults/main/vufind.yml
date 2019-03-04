@@ -32,3 +32,11 @@ sample_data_urls:
   - https://archive.org/download/unc_catalog_marc/marc-00048000-00049999.mrc
   - https://archive.org/download/unc_catalog_marc/marc-00050000-00051999.mrc
 sample_data_known_solr_query: http://localhost:8080/solr/biblio/select?q=id:80126
+
+vufind_driver: Demo
+vufind_resolver: demo
+vufind_resolver_baseurl: http://openurl.myuniversity.edu/sfx_local
+
+graphic_url: https://place-hold.it/50x20/00000/FFFFF.png&text=GET_IT&bold
+graphic_width: 50
+graphic_height: 20
