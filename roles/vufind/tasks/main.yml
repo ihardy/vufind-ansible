@@ -145,7 +145,7 @@
 
 - name: download vufind
   get_url:
-    url: https://github.com/vufind-org/vufind/releases/download/v5.1/vufind-{{ vufind_version }}.tar.gz
+    url: https://github.com/vufind-org/vufind/releases/download/v{{ vufind_version }}/vufind-{{ vufind_version }}.tar.gz
     dest: /tmp/vufind-{{ vufind_version }}.tar.gz
 
 - name: create vufind directory
