@@ -1,9 +1,9 @@
-vufind_version: 6.0.1
+vufind_version: 5.1.1
 vufind_db: vufind
 vufind_db_user: vufind
 vufind_db_pass: vufindadmin
 vufind_db_host: localhost
-vufind_load_sample_data: true
+vufind_load_sample_data: false
 solr_heap_size: 2G
 sample_data_urls: 
   - https://archive.org/download/unc_catalog_marc/marc-00000000-00001999.mrc
