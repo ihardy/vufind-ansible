@@ -1,6 +1,7 @@
 Vagrant.configure("2") do |config|
   # os
-  config.vm.box = "ubuntu/xenial64"
+  #config.vm.box = "ubuntu/xenial64"
+  config.vm.box = "ubuntu/bionic64"
 
   # headroom for solr
   config.vm.provider "virtualbox" do |vb|

@@ -1,4 +1,11 @@
 ---
+- name: Update all packages to the latest version
+  apt:
+    upgrade: dist
+    update_cache: yes
+    cache_valid_time: 3600
+  become: yes
+
 - name: install apache2
   apt:
     name: apache2
@@ -100,7 +107,7 @@
 - name: run vufind db and user creation script
   mysql_db: 
     state: import
-    target: /root/dbsetup.sql
+    target: "/root/dbsetup-{{ vufind_version }}.sql"
     config_file: /root/.my.cnf
     name: vufind
   become: yes

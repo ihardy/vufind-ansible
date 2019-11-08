@@ -2,4 +2,5 @@
 # provision vufind and load sample data
 - hosts: vufind
   roles:
-    - vufind
+    - role: vufind
+
